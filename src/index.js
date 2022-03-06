@@ -12,7 +12,7 @@ const Square = (props) => {
         <button
             className="square"
             onClick={props.onClick}
-            style={{ width: `${props.size}px` }}
+            style={{ width: `${props.size}px`, background: 'transparent' }}
         >
             {props.value}
         </button>
@@ -22,7 +22,7 @@ const Square = (props) => {
 
 const Board = (props) => {
 
-    console.log('Board render')
+    console.log('Board render', props.board)
     const renderSquare = (i, maxWidth, j) => {
         const a = i - (9 * j)
         return <Square
@@ -40,12 +40,18 @@ const Board = (props) => {
     return (
 
         <>
-            {utils.range(0, 8).map(j =>
-                <div className="board-list" id={j} key={j} style={{ maxWidth: `${props.maxWidth}px` }}>
-                    {utils.range(0 + (9 * j), 8 + (9 * j)).map(i =>
-                        renderSquare(i, props.maxWidth, j)
-                    )}
-                </div>
+            {utils.range(0, 8).map(j => {
+                // const isActiveBoard = props.board === 'All' ? true : j === props.board;
+                const isActiveBoard = props.board.includes(j);
+
+                return (
+                    <div className="board-list" id={j} key={j} style={{ maxWidth: `${props.maxWidth}px`, background: isActiveBoard ? 'white' : 'grey' }}>
+                        {utils.range(0 + (9 * j), 8 + (9 * j)).map(i =>
+                            renderSquare(i, props.maxWidth, j)
+                        )}
+                    </div>
+                )
+            }
             )}
 
         </>
@@ -53,7 +59,7 @@ const Board = (props) => {
 }
 
 const Game = () => {
-
+    const [boards, setBoards] = useState([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     console.log('Game render')
     const [history, setHistory] = useState([{
         outerBoards: Array(9).fill(null),
@@ -61,8 +67,8 @@ const Game = () => {
     }]);
     const [stepNumber, setStepNumber] = useState(0);
     const [xIsNext, setXIsNext] = useState(true);
-    // const [board, setBoard] = useState(0);
-    const [playableBoard, setPlayableBoard] = useState(null);
+    const [playableBoard, setPlayableBoard] = useState(boards);
+    const [gameOver, setGameOver] = useState(false);
     const myRef = useRef();
 
     const jumpTo = (step) => {
@@ -70,14 +76,24 @@ const Game = () => {
         setXIsNext((step % 2) === 0);
     }
 
+
+    /*     useEffect(() => {
+            setPlayableBoard(boards);
+        }, []) */
+
+    console.log(playableBoard, '000000')
     const handleClick = (i, currentBoard) => {
+
+        if (gameOver) return
+        if (!playableBoard.includes(currentBoard)) return
 
         const squareIndex = i - (9 * currentBoard);
 
+        console.log(squareIndex, currentBoard)
         const prevHistory = history.slice(stepNumber)[0];
         const prevHistoryInnerBoards = prevHistory.innerBoards;
 
-        // Changeable rule
+        // Game rule set 1
         if (calculateWinner(prevHistoryInnerBoards[currentBoard])) return;
 
         const newHistoryInnerBoards = prevHistoryInnerBoards.slice();
@@ -89,12 +105,6 @@ const Game = () => {
 
         newHistoryInnerBoards[currentBoard] = newEntry;
 
-
-        /*        setHistory(history.concat([{
-                   innerBoards: newHistoryInnerBoards,
-                   outerBoards: Array(9).fill(null),
-               }]));
-        */
         setHistory((prev) => [
             ...prev, {
                 innerBoards: newHistoryInnerBoards,
@@ -103,10 +113,14 @@ const Game = () => {
             }
         ])
 
-
         setStepNumber(history.length);
         setXIsNext(!xIsNext);
-        // setBoard(currentBoard);
+
+        // Game rule set 
+        if (boards.includes(squareIndex)) {
+            setPlayableBoard([squareIndex]);
+        }
+
 
         if (calculateWinner(newHistoryInnerBoards[currentBoard])) {
 
@@ -119,9 +133,18 @@ const Game = () => {
                 innerBoards: newHistoryInnerBoards,
                 outerBoards: newHistoryOuterBoards,
             }]));;
+
+            // Game rule set 2
+            // setPlayableBoard(currentBoard)
+
+            // Game rule set 1
+            setBoards((prev) => prev.filter(x => x !== currentBoard))
+            console.log(boards, 'adasdasw')
+            setPlayableBoard(boards.filter(x => x !== currentBoard))
         }
 
-
+        const winner = calculateWinner(current.outerBoards);
+        if (winner) setGameOver(true)
     }
 
     console.log(history)
@@ -129,8 +152,6 @@ const Game = () => {
     const current = newHistory[stepNumber];
     const winner = calculateWinner(current.outerBoards);
     const maxWidth = 220;
-    // const boardIndex = board;
-
 
     const moves = newHistory.map((step, move) => {
         const desc = move ?
@@ -144,16 +165,13 @@ const Game = () => {
         )
     })
 
-    /* 
-    const x = document.querySelector('.game-info-list li:last-child')*/
-
-
     let status;
     if (winner) {
         status = 'Winner: ' + winner;
     } else {
         status = 'Next player: ' + (xIsNext ? 'X' : 'O');
     }
+
 
 
     return (
@@ -164,9 +182,8 @@ const Game = () => {
                     onClick={(board, i) => {
                         handleClick(i, board);
                     }}
-                    // bigSquareId={(x, i) => this.teste(x, i)}
                     maxWidth={maxWidth}
-                // board={boardIndex}
+                    board={playableBoard}
                 />
             </div>
             <div className="game-info">
