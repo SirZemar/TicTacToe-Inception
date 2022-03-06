@@ -1,48 +1,75 @@
 body {
-    font: 14px "Century Gothic", Futura, sans-serif;
-    margin: 20px;
-  }
-  
-  ol, ul {
-    padding-left: 30px;
-  }
-  
-  .board-list {
-      display: flex;
-      flex-wrap: wrap;
-  }
-  
-  .status {
-    margin-bottom: 10px;
-  }
-  
-  .square {
-    background: #fff;
-    border: 1px solid #999;
-    font-size: 24px;
-    font-weight: bold;
-    line-height: 34px;
-    margin-right: -1px;
-    margin-top: -1px;
-    padding: 0;
-    text-align: center;
-    aspect-ratio: 1/1;
-  }
-  
-  .square:focus {
-    outline: none;
-  }
-  
-  .kbd-navigation .square:focus {
-    background: #ddd;
-  }
-  
-  .game {
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .game-info {
-    margin-left: 20px;
-  }
-  
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 0;
+}
+
+ol, ul {
+  padding-left: 30px;
+}
+
+.game-board .board-list:nth-child(3n + 1), .game-board .board-list:nth-child(3n + 2) {
+  border-right: 1.5px solid black;
+}
+
+
+.game-board .board-list:nth-child(3n + 2), .game-board .board-list:nth-child(3n + 3) {
+  border-left: 1.5px solid black;
+}
+
+.game-board .board-list:nth-child(-n + 6) {
+  border-bottom: 1.5px solid black;
+}
+
+.game-board .board-list:nth-last-child(-n + 6) {
+  border-top: 1.5px solid black;
+}
+
+
+.board-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  padding: 0;
+  text-align: center;
+  aspect-ratio: 1/1;
+}
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  height: 100vh;
+}
+
+.game-board {
+  grid-column: 2 / 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-self: center;
+  justify-self: center;
+}
+
+.game-info {
+  margin-left: 20px;
+  align-self: center;
+  max-height: 600px;
+  overflow-y: auto;
+}
